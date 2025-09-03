@@ -5,6 +5,8 @@ import google.genai as genai
 from google.genai import types
 from dotenv import load_dotenv
 
+from functions.get_files_info import get_files_info
+
 
 def main():
     load_dotenv()
@@ -54,4 +56,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print(get_files_info("calculator"))
