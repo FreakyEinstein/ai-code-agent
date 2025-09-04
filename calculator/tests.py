@@ -42,6 +42,22 @@ class TestCalculator(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.calculator.evaluate("+ 3")
 
+    def test_parentheses(self):
+        result = self.calculator.evaluate("2 * ( 3 + 4 )")
+        self.assertEqual(result, 14)
+
+    def test_complex_parentheses(self):
+        result = self.calculator.evaluate("10 - ( 2 * ( 3 + 1 ) ) / 4")
+        self.assertEqual(result, 8)
+
+    def test_mismatched_parentheses_open(self):
+        with self.assertRaises(ValueError):
+            self.calculator.evaluate("10 - ( 2 * ( 3 + 1 )")
+
+    def test_mismatched_parentheses_close(self):
+        with self.assertRaises(ValueError):
+            self.calculator.evaluate("10 - 2 * ( 3 + 1 ) )")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,6 +16,8 @@ class Calculator:
     def evaluate(self, expression):
         if not expression or expression.isspace():
             return None
+        # Add spaces around parentheses to allow for correct tokenization
+        expression = expression.replace('(', ' ( ').replace(')', ' ) ')
         tokens = expression.strip().split()
         return self._evaluate_infix(tokens)
 
@@ -32,6 +34,14 @@ class Calculator:
                 ):
                     self._apply_operator(operators, values)
                 operators.append(token)
+            elif token == '(':
+                operators.append(token)
+            elif token == ')':
+                while operators and operators[-1] != '(':
+                    self._apply_operator(operators, values)
+                if not operators or operators[-1] != '(':
+                    raise ValueError("Mismatched parentheses")
+                operators.pop()  # Pop the '('
             else:
                 try:
                     values.append(float(token))
@@ -39,6 +49,8 @@ class Calculator:
                     raise ValueError(f"invalid token: {token}")
 
         while operators:
+            if operators[-1] == '(':
+                raise ValueError("Mismatched parentheses")
             self._apply_operator(operators, values)
 
         if len(values) != 1:
