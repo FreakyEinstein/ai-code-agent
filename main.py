@@ -35,7 +35,9 @@ def main():
         - Read file contents
         - Execute Python files with optional arguments
         - Write or overwrite files
-        When the user asks to 
+        When the user asks to work on a any changes or asks to fix, the project is always available in the WORKING_DIR value.
+        Before you finalise the results, you need to test all the scenarios if new tests are to needed then include new test cases in the unit tests.
+        Also you have to run the files to test if it works as expected or not.
         All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
         Once you have the final answer, provide it in a clear and concise way.
         """
