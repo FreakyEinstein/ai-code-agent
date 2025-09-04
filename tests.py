@@ -1,5 +1,6 @@
 from functions.get_files_info import get_files_info
 from functions.get_file_content import get_file_content
+from functions.write_file import write_file
 
 
 def run_manual_tests():
@@ -54,6 +55,25 @@ def test_get_file_content():
     print("\n--- get_file_content tests complete ---")
 
 
+def test_write_file():
+    """
+    Tests the write_file function with various cases.
+    """
+    print("\n--- Testing write_file function ---")
+
+    print("\n[1] Writing to a file:")
+    print(write_file("calculator", "lorem.txt", "wait, this isn't lorem ipsum"))
+
+    print("\n[2] Writing to a new file in a nested directory:")
+    print(write_file("calculator", "pkg/morelorem.txt", "lorem ipsum dolor sit amet"))
+
+    print("\n[3] Attempting to write to a file outside the working directory:")
+    print(write_file("calculator", "/tmp/temp.txt", "this should not be allowed"))
+
+    print("\n--- write_file tests complete ---")
+
+
 if __name__ == "__main__":
     # run_manual_tests()
-    test_get_file_content()
+    # test_get_file_content()
+    test_write_file()
