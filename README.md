@@ -1,25 +1,70 @@
 # AI Code Agent
 
-This project is a toy version of an "agentic" AI code editor, similar to Cursor or Claude Code, built using Google's Gemini API. It's a CLI tool that can understand a coding task and use a set of predefined functions to try and complete it.
+This project is a simple, command-line "agentic" AI code editor built using Google's Gemini API. It's a toy version of tools like Cursor or the agentic features in Claude, designed to demonstrate the core principles of an AI agent that can interact with a local filesystem to complete coding tasks.
 
-## What Does the Agent Do?
+## How it Works
 
-The program is a CLI tool that:
+The agent operates in a loop, allowing it to reason, act, and observe the results of its actions, refining its approach until the user's request is fulfilled.
 
-1.  Accepts a coding task (e.g., "fix my calculator app, it's not starting correctly").
-2.  Chooses from a set of predefined functions to work on the task. These functions include:
-    - Scanning files in a directory.
-    - Reading a file's contents.
-    - Overwriting a file's contents.
-    - Executing a Python script.
-3.  Repeats the function-calling process until the task is complete (or it fails).
+The process is as follows:
 
-### Example Usage
+1.  **Prompt:** The user provides a high-level coding task via the command line.
+2.  **Reasoning:** The Gemini model receives the prompt, the conversation history, and a list of available tools. It decides which tool to use to get closer to the goal.
+3.  **Action:** The agent executes the chosen function (e.g., `get_file_content`). All actions are sandboxed and restricted to a specific working directory (`calculator/` in this project) for security.
+4.  **Observation:** The output of the function (e.g., file contents or an error message) is sent back to the model.
+5.  **Repeat:** The model takes the new information into account and goes back to step 2, choosing the next best action. This loop continues until the agent believes the task is complete or it hits a maximum iteration limit.
+6.  **Response:** The agent provides a final, textual response to the user summarizing the work done.
 
-Here's an example of using the agent to fix a buggy calculator app:
+## Getting Started
+
+Follow these steps to get the AI agent running on your local machine.
+
+### Prerequisites
+
+- Python 3.10+
+- uv - A fast Python project and package manager.
+- Git for cloning the repository.
+- Access to a Unix-like shell (e.g., zsh or bash).
+
+### Installation
+
+1.  **Clone the repository:**
+
+    ```bash
+    git clone <repository-url>
+    cd ai-code-agent
+    ```
+
+2.  **Install dependencies:**
+    This project uses `google-generativeai` to interact with the Gemini API and `python-dotenv` for managing environment variables.
+    ```bash
+    uv pip install google-generativeai python-dotenv
+    ```
+
+### Configuration
+
+The agent requires an API key from Google to use the Gemini model.
+
+1.  **Get a Gemini API Key:**
+    Visit Google AI Studio to create your free API key.
+
+2.  **Create a `.env` file:**
+    In the root of the project directory, create a file named `.env` and add your API key to it:
+    ```
+    GEMINI_API_KEY="YOUR_API_KEY_HERE"
+    ```
+    The application uses the `dotenv` library to load this key automatically.
+
+## Usage
+
+You can run the agent from your terminal using `uv`. The agent is hardcoded to operate within the `calculator/` directory.
+
+### Basic Command
+
+Provide your coding task as a string argument.
 
 ```bash
-uv run main.py "fix my calculator app, its not starting correctly"
+uv run main.py "fix the bug in my calculator where it doesn't handle parentheses"
 ```
 
 The agent would then proceed to call functions to understand and fix the code, showing output like this:
