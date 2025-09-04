@@ -100,14 +100,20 @@ def main():
                 break
 
             # Execute the function calls.
+            function_response_parts = []
             for function_call_part in response.function_calls:
                 function_call_result = call_function(
                     function_call_part, args.verbose)
                 if args.verbose:
                     print(
                         f"-> {function_call_result.parts[0].function_response.response}")
-                # Add the function call result to the conversation history.
-                messages.append(function_call_result)
+                # Collect the function response part.
+                function_response_parts.append(function_call_result.parts[0])
+
+            if function_response_parts:
+                # Add the function call results to the conversation history as a single message.
+                messages.append(types.Content(
+                    role="tool", parts=function_response_parts))
         else:
             print("Agent reached max iterations, exiting.")
 
