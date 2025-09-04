@@ -1,9 +1,10 @@
 from functions.get_files_info import get_files_info
 from functions.get_file_content import get_file_content
 from functions.write_file import write_file
+from functions.run_python import run_python_file
 
 
-def run_manual_tests():
+def test_get_files_info():
     """
     Runs a series of manual tests on the get_files_info function
     and prints the output for debugging purposes.
@@ -73,7 +74,33 @@ def test_write_file():
     print("\n--- write_file tests complete ---")
 
 
+def test_run_python_file():
+    """
+    Tests the run_python_file function with various cases.
+    """
+    print("\n--- Testing run_python_file function ---")
+
+    print("\n[1] Running a valid Python file inside the working directory:")
+    result = run_python_file("calculator", "main.py")
+    print(result)
+
+    print("\n[2] Running another valid file (the calculator's own tests):")
+    result = run_python_file("calculator", "tests.py")
+    print(result)
+
+    print("\n[3] Attempting to run a file outside the working directory:")
+    result = run_python_file("calculator", "../main.py")
+    print(result)
+
+    print("\n[4] Attempting to run a non-existent file:")
+    result = run_python_file("calculator", "nonexistent.py")
+    print(result)
+
+    print("\n--- run_python_file tests complete ---")
+
+
 if __name__ == "__main__":
-    # run_manual_tests()
+    # test_get_files_info()
     # test_get_file_content()
-    test_write_file()
+    # test_write_file()
+    test_run_python_file()

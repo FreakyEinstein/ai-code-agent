@@ -5,7 +5,12 @@ import google.genai as genai
 from google.genai import types
 from dotenv import load_dotenv
 
-from functions.get_files_info import get_files_info
+from functions.get_files_info import schema_get_files_info
+from functions.get_file_content import schema_get_file_content
+from functions.write_file import schema_write_file
+from functions.run_python import schema_run_python_file
+
+from call_functions import call_function
 
 
 def main():
@@ -21,6 +26,28 @@ def main():
     )
     args = parser.parse_args()
 
+    system_prompt = """
+        You are a helpful AI coding agent.
+        You can make multiple function calls to achieve the user's goal.
+        When a user asks a question or makes a request, think step-by-step and use the available tools to answer the request.
+        You can perform the following operations:
+        - List files and directories
+        - Read file contents
+        - Execute Python files with optional arguments
+        - Write or overwrite files
+        All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
+        Once you have the final answer, provide it in a clear and concise way.
+        """
+
+    available_functions = types.Tool(
+        function_declarations=[
+            schema_get_files_info,
+            schema_get_file_content,
+            schema_write_file,
+            schema_run_python_file
+        ]
+    )
+
     try:
         # Use the newer genai configuration and add error handling for the API key
         api_key = os.environ.get("GEMINI_API_KEY")
@@ -32,23 +59,54 @@ def main():
         messages = [
             types.Content(role="user", parts=[types.Part(text=args.prompt)]),
         ]
-        response = client.models.generate_content(
-            model='gemini-2.0-flash-001',
-            contents=messages,
 
-        )
+        MAX_ITERS = 20
+        for i in range(MAX_ITERS):
+            if args.verbose:
+                print(f"\n--- Iteration {i+1}/{MAX_ITERS} ---")
 
-        print(response.text)
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-001',
+                contents=messages,
+                config=types.GenerateContentConfig(
+                    tools=[available_functions],
+                    system_instruction=system_prompt
+                ),
+            )
 
-        # Print verbose information if the flag is set
-        if args.verbose and hasattr(response, 'usage_metadata') and response.usage_metadata:
-            print("\n--- Verbose Info ---")
-            print(f"User Prompt: {args.prompt}")
-            print(
-                f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
-            print(
-                f"Response tokens: {response.usage_metadata.candidates_token_count}")
-            print(f"Total tokens: {response.usage_metadata.total_token_count}")
+            if not response.candidates:
+                print("No response from model, exiting.")
+                break
+
+            # Add the model's response to the conversation history.
+            messages.append(response.candidates[0].content)
+
+            # Print verbose information if the flag is set
+            if args.verbose and response.usage_metadata:
+                print("\n--- Verbose Info ---")
+                print(
+                    f"Prompt tokens: {response.usage_metadata.prompt_token_count}")
+                print(
+                    f"Response tokens: {response.usage_metadata.candidates_token_count}")
+                print(
+                    f"Total tokens: {response.usage_metadata.total_token_count}")
+
+            # If there are no function calls, the model has given its final answer.
+            if not response.function_calls:
+                print(f"Final response:\n{response.text}")
+                break
+
+            # Execute the function calls.
+            for function_call_part in response.function_calls:
+                function_call_result = call_function(
+                    function_call_part, args.verbose)
+                if args.verbose:
+                    print(
+                        f"-> {function_call_result.parts[0].function_response.response}")
+                # Add the function call result to the conversation history.
+                messages.append(function_call_result)
+        else:
+            print("Agent reached max iterations, exiting.")
 
     except Exception as e:
         print(f"An error occurred: {e}", file=sys.stderr)
@@ -56,4 +114,4 @@ def main():
 
 
 if __name__ == "__main__":
-    print(get_files_info("calculator"))
+    main()
