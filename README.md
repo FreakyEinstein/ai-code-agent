@@ -94,10 +94,59 @@ This is the main entry point for the AI agent. It takes a user's prompt and uses
 
 ### `functions/`
 
-This directory contains the tools available to the AI agent.
+This directory houses the functional tools the AI agent utilizes to interact with the file system and perform coding tasks. Each file within this directory defines a specific capability, adhering to a consistent structure that includes a function definition and a corresponding schema for interaction with the Gemini API.
 
-- `get_files_info.py`: Scans the files in a directory to provide context to the agent.
-- `get_file_content.py`: Reads the content of a specific file.
+#### `get_files_info.py`
+
+This module provides the `get_files_info` function, which lists the files and subdirectories within a specified directory, providing essential context to the agent about the file system structure.
+
+**Function:** `get_files_info(working_directory, directory=".")`
+
+- **Description:** Lists files in the specified directory along with their sizes and directory status, constrained to the working directory.
+- **Parameters:**
+  - `working_directory` (str): The base directory where the agent is allowed to operate.
+  - `directory` (str, optional): The directory to list files from, relative to the working directory. Defaults to the working directory itself.
+- **Returns:** A string containing a list of files with their sizes and directory status or an error message if the directory is inaccessible or outside the working directory.
+
+#### `get_file_content.py`
+
+This module contains the `get_file_content` function, which retrieves the content of a file.
+
+**Function:** `get_file_content(working_directory, file_path)`
+
+- **Description:** Retrieves the contents of a specified file as a string, with access constrained to the working directory.
+- **Parameters:**
+  - `working_directory` (str): The directory where the agent is permitted to operate.
+  - `file_path` (str): The path to the file to be read, relative to the working directory.
+- **Returns:** The content of the file as a string, truncated to `MAX_CHARS` if necessary, or an error message.
+
+#### `write_file.py`
+
+This module includes the `write_file` function, enabling the agent to modify files within the designated working directory.
+
+**Function:** `write_file(working_directory, file_path, content)`
+
+- **Description:** Writes content to a file within the specified working directory, overwriting existing files or creating new ones as needed.
+- **Parameters:**
+  - `working_directory` (str): The directory where the agent is authorized to perform file operations.
+  - `file_path` (str): The path to the file to be written, relative to the working directory.
+  - `content` (str): The content to write to the file.
+- **Returns:** A success message or an error message if the write operation fails or the file path is outside the permitted working directory.
+
+#### `run_python.py`
+
+This module enables the agent to execute Python files within the designated working directory.
+
+**Function:** `run_python_file(working_directory, file_path, args=None)`
+
+- **Description:** Executes a Python file within a specified working directory.
+- **Args:**
+  - `working_directory` (str): The directory where the agent is allowed to operate.
+  - `file_path` (str): The path to the Python file to be executed, relative to the working directory.
+  - `args` (list, optional): A list of command-line arguments to pass to the Python script. Defaults to None.
+- **Returns:**
+  - str: The combined standard output and standard error of the executed script,
+    or an error message if the execution fails or is not permitted.
 
 ### `calculator/`
 
